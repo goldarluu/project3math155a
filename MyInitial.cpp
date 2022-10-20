@@ -14,8 +14,8 @@
 
 // Use the static library (so glew32.dll is not needed):
 #define GLEW_STATIC
-#include <C:/GL/glew.h> 
-#include <C:/GLFW/glfw3.h>
+#include <GL/glew.h> 
+#include <GLFW/glfw3.h>
 
 #include "LinearR3.h"		// Adjust paths as needed.
 #include "LinearR4.h"		
@@ -39,6 +39,7 @@
 // YOU MAY WISH TO RE-DO THIS FOR YOUR CUSTOM ANIMATION.  
 double animateIncrement = 0.01;   // Make bigger to speed up animation, smaller to slow it down.
 double currentTime = 0.0;         // Current "time" for the animation.
+double currentTime_rev = 0.0; 
 double maxTime = 1.0;             // Time cycles back to 0 after reaching maxTime.
 
 // These two variables control whether running or paused.
@@ -94,8 +95,13 @@ void MyRenderInitial() {
     //  
     if (spinMode) {
         currentTime += animateIncrement;
+        currentTime_rev += animateIncrement; 
         if (currentTime >= maxTime) {
             currentTime = currentTime - floor(currentTime/maxTime);  // Floor function = round down to nearest integer
+        }
+
+        if (currentTime_rev > maxTime) {
+            currentTime_rev =  floor(currentTime_rev / maxTime)- currentTime_rev ; //givs 
         }
         if (singleStep) {
             spinMode = false;       // If in single step mode, turn off future animation
@@ -136,10 +142,11 @@ void MyRenderInitial() {
     mat2 = mat1; 
     mat2.Mult_glTranslate(0.0, 0.0, -0.3);
     mat2.Mult_glRotate(PIhalves, 0.0, 0.0, 1.0);  // Rotate onto its side m,.nm,.jhklhjkl;;hjkl
-    mat2.Mult_glScale(0.3, 0.8, 0.2);          // Scale the cylinder, to thiner, flater and taller 
+    mat2.Mult_glScale(0.3, 1.3 * (currentTime-(1-currentTime_rev)), 0.2);          // Scale the cylinder, to thiner, flater and taller 
     mat2.DumpByColumns(matEntries);
     glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
     unitCylinder.Render();
+
 
 
     // Draw the nucleus of the Atom! // just for fun, we can have it rotate around the center 
@@ -153,16 +160,48 @@ void MyRenderInitial() {
     glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
     unitSphere.Render();
 
+    // ELECTRONNNN 
+    glVertexAttrib3f(vColor_loc, 1.0f, 1.0f, 1.0f);
+    mat2 = mat1;
+    mat2.Mult_glRotate(currentTime * PI2, 1.0, 1.0, 1.0);   // PI2 is 2*pi (defined in MathMisc.h)
+    mat2.Mult_glTranslate(0.0, 3.0, -0.3);
+    // mat2.Mult_glRotate(PIhalves, 0.0, 0.0, 1.0);  // Rotate 30 degrees
+    mat2.Mult_glScale(0.2, 0.2, 0.2);          // Scale the cylinder, to thiner, flater and taller 
+    mat2.DumpByColumns(matEntries);
+    glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
+    unitSphere.Render();
 
     // Render the torus
-    glVertexAttrib3f(vColor_loc, 0.8f, 0.0f, 0.0f);  // Red color (slightly darkened)
+    glVertexAttrib3f(vColor_loc, 0.2f, 0.1f, 1.0f);  // Red color (slightly darkened)
     mat2 = mat1;                              // Back to the main Modelview matrix
+    mat2.Mult_glTranslate(0.0, 0.0, -0.3);
     mat2.Mult_glScale(0.8);                   // Uniform scaling
     mat2.DumpByColumns(matEntries);
     glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
     torus1.Render();
 
+    glVertexAttrib3f(vColor_loc, 0.2f, 0.1f, 0.4f);  // Red color (slightly darkened)
+    mat2 = mat1;                              // Back to the main Modelview matrix
+    mat2.Mult_glTranslate(0.0, 0.0, -0.3);
+    mat2.Mult_glRotate(currentTime * PI2, 1.0, 1.0, 1.0);   // PI2 is 2*pi (defined in MathMisc.h)
+    mat2.Mult_glScale(3.0);                   // Uniform scaling
+    mat2.DumpByColumns(matEntries);
+    glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
+    torus1.Render();
+
+
+    glVertexAttrib3f(vColor_loc, 0.2f, 0.1f, 0.4f);  // Red color (slightly darkened)
+    mat2 = mat1;                              // Back to the main Modelview matrix
+    mat2.Mult_glTranslate(0.0, 0.0, -0.3);
+    mat2.Mult_glRotate(currentTime * PI2, -1.0, -1.0, -1.0);   // PI2 is 2*pi (defined in MathMisc.h)
+    mat2.Mult_glScale(3.0);                   // Uniform scaling
+    mat2.DumpByColumns(matEntries);
+    glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
+    torus1.Render();
+
+
     // Render the revolving ellipsoid
+    /*
     glVertexAttrib3f(vColor_loc, 0.6f, 0.4f, 1.0f);  // Blue/Magenta-ish color
     mat2 = mat1;                              // Back to the main Modelview matrix
     mat2.Mult_glRotate(currentTime*PI2, 0.0, 1.0, 0.0);   // PI2 is 2*pi (defined in MathMisc.h)
@@ -171,6 +210,7 @@ void MyRenderInitial() {
     mat2.DumpByColumns(matEntries);
     glUniformMatrix4fv(modelviewMatLocation, 1, false, matEntries);
     unitSphere.Render();
+    */
 }
 
 
